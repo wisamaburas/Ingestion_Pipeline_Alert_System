@@ -32,3 +32,10 @@ Task 01:
 
 Task 02: 
 
+- Threshold: 70 mg/dL (low) - 180 mg/dL (high)
+- Diabetes threshold: 80 - 160
+- Critically high diabetes: > 220 (own decision)
+- Critically low diabetes : < 40 (own decision)
+- Low battery percentage alert : < 20 (own decision)
+- Signal quality low alert : when degraded 
+

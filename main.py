@@ -6,8 +6,15 @@ from database import init_db, insert_reading, DuplicateReadingError
 app = Flask(__name__)
 init_db()
 
+mgdl_threshold = { 
+    "PT-8813": (80, 160), # diabetes
+    }
+
+default_threshold = (70, 180)
+
 class Payload:
     valid_signal_quality = {"good", "poor", "degraded"}
+    valid_theshold = {}
 
     def __init__(self, data: dict):
         self.device_id = data.get("device_id")
@@ -62,6 +69,17 @@ def ingest_reading():
  
     try:
         insert_reading(reading)
+        low, high = mgdl_threshold.get(payload.patient_id, default_threshold) # use default if patient not found
+        if payload.glucose_mgdl < low or payload.glucose_mgdl > high: 
+            print(f"Alert: {payload.patient_id} glucose {payload.glucose_mgdl} out of range ({low}-{high})")
+        if payload.glucose_mgdl < 40:
+            print(f"Alert: {payload.patient_id} glucose {payload.glucose_mgdl} is critically low")
+        if payload.glucose_mgdl > 220:
+            print(f"Alert: {payload.patient_id} glucose {payload.glucose_mgdl} is critically high")
+        if payload.battery_pct < 20:
+            print(f"Alert: {payload.patient_id} battery {payload.battery_pct} is low")
+        if payload.signal_quality == "degraded":
+            print(f"Alert: {payload.patient_id} signal quality is {payload.signal_quality}")
     except DuplicateReadingError:
         return jsonify({"status": "duplicate"}), 409
  

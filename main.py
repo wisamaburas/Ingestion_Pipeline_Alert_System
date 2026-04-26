@@ -91,8 +91,11 @@ def ingest_reading():
 def get_summary(patient_id):
     n = request.args.get("n", 12, type=int)
     readings = get_reading(patient_id, n)
+    latest = readings[0] if readings else None
     return jsonify({
-        "readings": readings
+        "readings": readings,
+        "battery_pct": latest[3] if latest else None,
+        "signal_quality": latest[4] if latest else None,
     })
 
 

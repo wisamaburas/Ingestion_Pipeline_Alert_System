@@ -37,25 +37,11 @@ def insert_reading(reading: dict):
     finally:
         conn.close()
 
-# cx = sqlite3.connect("test.db")
-
-# cx = sqlite3.connect(":memory:")
-
-
-# cu = cx.cursor()
-
-
-# # create a table
-# cu.execute("create table lang(name, first_appeared)")
-# cu.execute("create table validate(device_id, patient_id, glucose_mgdl, battery_pct, signal_quality, recorded_at)")
-
-
-# # insert values into a table
-# cu.execute("insert into validate values (?, ?)", ("C", 1972))
-
-
-# # execute a query and iterate over the result
-# for row in cu.execute("select * from validate"):
-#         print(row)
-# cx.close()
+def get_reading(patient_id, n=12):
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM readings WHERE patient_id = ? ORDER BY recorded_at DESC LIMIT ?", (patient_id, n))
+    result = cur.fetchmany(n)
+    conn.close()
+    return result
 

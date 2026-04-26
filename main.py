@@ -1,7 +1,5 @@
-# task 1
-
 from flask import Flask, request, jsonify
-from database import init_db, insert_reading, DuplicateReadingError
+from database import init_db, insert_reading, get_reading, DuplicateReadingError
  
 app = Flask(__name__)
 init_db()
@@ -47,6 +45,8 @@ class Payload:
         if not self.recorded_at:
             raise ValueError("recorded_at required")
         
+
+
 @app.route("/readings", methods=["POST"])
 def ingest_reading():
     data = request.get_json(silent=True)
@@ -69,6 +69,7 @@ def ingest_reading():
  
     try:
         insert_reading(reading)
+
         low, high = mgdl_threshold.get(payload.patient_id, default_threshold) # use default if patient not found
         if payload.glucose_mgdl < low or payload.glucose_mgdl > high: 
             print(f"Alert: {payload.patient_id} glucose {payload.glucose_mgdl} out of range ({low}-{high})")
@@ -86,5 +87,14 @@ def ingest_reading():
     return jsonify({"status": "accepted"}), 201
  
  
+@app.route("/patients/<patient_id>/summary", methods=["GET"])
+def get_summary(patient_id):
+    n = request.args.get("n", 12, type=int)
+    readings = get_reading(patient_id, n)
+    return jsonify({
+        "readings": readings
+    })
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
